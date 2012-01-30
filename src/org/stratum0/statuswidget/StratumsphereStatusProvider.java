@@ -2,7 +2,9 @@ package org.stratum0.statuswidget;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.Calendar;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.GregorianCalendar;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -28,12 +30,13 @@ public class StratumsphereStatusProvider extends AppWidgetProvider {
 			RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.main);
 			int currentImage = R.drawable.stratum0_unknown;
 			
-			Calendar now = Calendar.getInstance();
-			String text = "Updated: ";
-			if (now.getTime().getHours() < 10) text += "0";
-			text += now.getTime().getHours() + ":";
-			if (now.getTime().getMinutes() < 10) text += "0";
-			text += now.getTime().getMinutes();
+			Date now = new GregorianCalendar().getTime();
+			String text = "Updated:\n";
+			String upTimeText = "\n\n00    00";
+			if (now.getHours() < 10) text += "0";
+			text += now.getHours() + ":";
+			if (now.getMinutes() < 10) text += "0";
+			text += now.getMinutes();
 			
 			String jsonText = getStatusFromJSON();
 			if (jsonText.startsWith("{") && jsonText.endsWith("}")) {
@@ -45,13 +48,25 @@ public class StratumsphereStatusProvider extends AppWidgetProvider {
 					else {
 						currentImage = R.drawable.stratum0_closed;
 					}
+					String upTime = jsonObject.getString("since");
+					SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+					Date d = f.parse(upTime);
+					long upTimeMins = (now.getTime()-d.getTime())/(1000*60) % 60;
+					long upTimeHours = (now.getTime()-d.getTime())/(1000*60) / 60;
+					upTimeText = "\n\n";
+					if (upTimeHours < 10) upTimeText += "0";
+					upTimeText += upTimeHours + "     ";
+					if (upTimeMins < 10) upTimeText += "0";
+					upTimeText += upTimeMins;				
 				} catch (Exception e) {
 					//in case of any error, just leave the state as unknown for now
+					upTimeText = "";
 				}
 			}
 		
 			views.setImageViewResource(R.id.statusImageView, currentImage);
 			views.setTextViewText(R.id.timestampTextView, text);
+			views.setTextViewText(R.id.uptimeTextView, upTimeText);
 			
 			// Register an onClickListener
 			Intent intent = new Intent(context, StratumsphereStatusProvider.class);
