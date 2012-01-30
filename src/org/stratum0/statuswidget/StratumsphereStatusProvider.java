@@ -1,8 +1,13 @@
 package org.stratum0.statuswidget;
 
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.Calendar;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONObject;
 
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -12,6 +17,8 @@ import android.content.Intent;
 import android.widget.RemoteViews;
 
 public class StratumsphereStatusProvider extends AppWidgetProvider {
+	
+	private String url = "http://rohieb.name/stratum0/status.json";
 
 	@Override
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
@@ -27,22 +34,20 @@ public class StratumsphereStatusProvider extends AppWidgetProvider {
 			text += now.getTime().getHours() + ":";
 			if (now.getTime().getMinutes() < 10) text += "0";
 			text += now.getTime().getMinutes();
-
-			try {
-				URL url = new URL("http://rohieb.name/stuff/stratum0/status/status.png");
-				HttpURLConnection ucon = (HttpURLConnection)url.openConnection();
-				ucon.setInstanceFollowRedirects(false);
-				ucon.connect();
-				String redirectedURL = ucon.getHeaderField("Location");
-				if (redirectedURL.endsWith("open.png")) {
-					currentImage = R.drawable.stratum0_open;
+			
+			String jsonText = getStatusFromJSON();
+			if (jsonText.startsWith("{") && jsonText.endsWith("}")) {
+				try {
+					JSONObject jsonObject = new JSONObject(jsonText);
+					if (jsonObject.getBoolean("isOpen")) {
+						currentImage = R.drawable.stratum0_open;
+					}
+					else {
+						currentImage = R.drawable.stratum0_closed;
+					}
+				} catch (Exception e) {
+					//in case of any error, just leave the state as unknown for now
 				}
-				else if (redirectedURL.endsWith("closed.png")) {
-					currentImage = R.drawable.stratum0_closed;
-				}
-				ucon.disconnect();
-			} catch (Exception e) {
-				//in case of any error, just leave the state as unknown for now
 			}
 		
 			views.setImageViewResource(R.id.statusImageView, currentImage);
@@ -59,6 +64,24 @@ public class StratumsphereStatusProvider extends AppWidgetProvider {
 		}
 	}
 	
+	public String getStatusFromJSON() {
+		String result = "";
+		DefaultHttpClient client = new DefaultHttpClient();
+		try {
+			HttpResponse response = client.execute(new HttpGet(url));
+			if (response.getStatusLine().getStatusCode() == 200) {
+				BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+				String line;
+				while ((line = br.readLine()) != null) {
+					result += line;
+				}
+			}
+		} catch (Exception e) {
+			//just return an empty string when something goes wrong
+		}
+		return result;
+	}
+ 	
 	
 
 }

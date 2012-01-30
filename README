@@ -1,3 +1,10 @@
 StratumsphereStatusWidget
 
 This is an Android app to show the status of the Stratum 0 hacker space.
+
+
+Changelog:
+
+1.0.1	Switched to JSON API
+
+1.0		Initial release
