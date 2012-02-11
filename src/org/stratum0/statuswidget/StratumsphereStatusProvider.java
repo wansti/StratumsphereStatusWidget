@@ -31,8 +31,9 @@ public class StratumsphereStatusProvider extends AppWidgetProvider {
 			int currentImage = R.drawable.stratum0_unknown;
 			
 			Date now = new GregorianCalendar().getTime();
+			//TODO proper number formatting
 			String text = "Updated:\n";
-			String upTimeText = "\n\n00    00";
+			String upTimeText = "";
 			if (now.getHours() < 10) text += "0";
 			text += now.getHours() + ":";
 			if (now.getMinutes() < 10) text += "0";
@@ -51,22 +52,22 @@ public class StratumsphereStatusProvider extends AppWidgetProvider {
 					String upTime = jsonObject.getString("since");
 					SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 					Date d = f.parse(upTime);
+					//TODO Date class probably offers a better way to do this 
 					long upTimeMins = (now.getTime()-d.getTime())/(1000*60) % 60;
 					long upTimeHours = (now.getTime()-d.getTime())/(1000*60) / 60;
-					upTimeText = "\n\n";
-					if (upTimeHours < 10) upTimeText += "0";
+					//TODO proper number formatting
+					if (upTimeHours < 10) upTimeText += "0"; 
 					upTimeText += upTimeHours + "     ";
 					if (upTimeMins < 10) upTimeText += "0";
 					upTimeText += upTimeMins;				
 				} catch (Exception e) {
 					//in case of any error, just leave the state as unknown for now
-					upTimeText = "";
 				}
 			}
 		
 			views.setImageViewResource(R.id.statusImageView, currentImage);
-			views.setTextViewText(R.id.timestampTextView, text);
-			views.setTextViewText(R.id.uptimeTextView, upTimeText);
+			views.setTextViewText(R.id.lastUpdateTextView, text);
+			views.setTextViewText(R.id.spaceUptimeTextView, upTimeText);
 			
 			// Register an onClickListener
 			Intent intent = new Intent(context, StratumsphereStatusProvider.class);
