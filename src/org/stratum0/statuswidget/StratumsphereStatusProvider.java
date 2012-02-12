@@ -16,16 +16,27 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.widget.RemoteViews;
+import android.util.Log;
+
+
+
 
 public class StratumsphereStatusProvider extends AppWidgetProvider {
 	
+
+	private static final String TAG = "Stratum0";
 	private String url = "http://rohieb.name/stratum0/status.json";
 
 	@Override
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+
+		WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+		WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+
 		for (int i=0; i<appWidgetIds.length; i++) {
-			
 			int appWidgetId = appWidgetIds[i];
 			RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.main);
 			int currentImage = R.drawable.stratum0_unknown;
@@ -43,12 +54,6 @@ public class StratumsphereStatusProvider extends AppWidgetProvider {
 			if (jsonText.startsWith("{") && jsonText.endsWith("}")) {
 				try {
 					JSONObject jsonObject = new JSONObject(jsonText);
-					if (jsonObject.getBoolean("isOpen")) {
-						currentImage = R.drawable.stratum0_open;
-					}
-					else {
-						currentImage = R.drawable.stratum0_closed;
-					}
 					String upTime = jsonObject.getString("since");
 					SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 					Date d = f.parse(upTime);
@@ -59,12 +64,34 @@ public class StratumsphereStatusProvider extends AppWidgetProvider {
 					if (upTimeHours < 10) upTimeText += "0"; 
 					upTimeText += upTimeHours + "     ";
 					if (upTimeMins < 10) upTimeText += "0";
-					upTimeText += upTimeMins;				
+					upTimeText += upTimeMins;
+
+					if (jsonObject.getBoolean("isOpen")) {
+						currentImage = R.drawable.stratum0_open;
+					}
+					else {
+						if (wifiInfo.getSSID() == null) {
+							currentImage = R.drawable.stratum0_closed;
+						}
+						else {
+							if (wifiInfo.getSSID().equals("Stratum0") || wifiInfo.getSSID() == null) {
+								openSpace();
+								currentImage = R.drawable.stratum0_open;
+								upTimeText = "";
+								text = text + " WIFI";
+							}
+							else{
+								currentImage = R.drawable.stratum0_closed;
+							}
+						}
+					}
 				} catch (Exception e) {
-					//in case of any error, just leave the state as unknown for now
+					Log.w(TAG, "Exception " + e);
 				}
 			}
-		
+
+
+
 			views.setImageViewResource(R.id.statusImageView, currentImage);
 			views.setTextViewText(R.id.lastUpdateTextView, text);
 			views.setTextViewText(R.id.spaceUptimeTextView, upTimeText);
@@ -80,6 +107,10 @@ public class StratumsphereStatusProvider extends AppWidgetProvider {
 		}
 	}
 	
+	private void openSpace() {
+		// call some API to open the Space (change status to open)
+	}
+
 	public String getStatusFromJSON() {
 		String result = "";
 		DefaultHttpClient client = new DefaultHttpClient();
@@ -93,11 +124,11 @@ public class StratumsphereStatusProvider extends AppWidgetProvider {
 				}
 			}
 		} catch (Exception e) {
-			//just return an empty string when something goes wrong
+			Log.w(TAG, "Exception " + e);
 		}
 		return result;
 	}
  	
-	
+
 
 }
