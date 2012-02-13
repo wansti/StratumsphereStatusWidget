@@ -7,8 +7,8 @@ TODO open space when connected to WiFi (API is missing)
 
 Changelog:
 
-1.1beta1 	Show notification when connected to Stratum0 WiFi 
-		and API retuns status=closed
+1.0.3	 	Show notification when connected to Stratum0 WiFi 
+			and API retuns status=closed
 
 1.0.2		Show "status uptime" inside the logo
 

@@ -26,13 +26,13 @@ import android.app.Notification;
 
 public class StratumsphereStatusProvider extends AppWidgetProvider {
 	
-	
 	private static final String TAG = "Stratum0";
 	private static final String url = "http://rohieb.name/stratum0/status.json";
 	private static final int nID = 1;
 
 	@Override
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+		
 		//get WiFi APIs
 		WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
 		WifiInfo wifiInfo = wifiManager.getConnectionInfo();
@@ -40,9 +40,12 @@ public class StratumsphereStatusProvider extends AppWidgetProvider {
 		//Prepare notification
 		NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 		Notification nNotOpen = new Notification();
+		
 		//legacy work for Android 2.x (where notifications need an intenthandler)
 		Intent notificationIntent = new Intent(context, StratumsphereStatusProvider.class);
-		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);		nNotOpen.defaults = Notification.DEFAULT_ALL;
+		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
+		nNotOpen.defaults = Notification.DEFAULT_ALL;
+		
 		//setting up the notification
 		nNotOpen.icon = R.drawable.stratum0_unknown;
 		nNotOpen.tickerText = context.getText(R.string.nNotOpen);
@@ -84,9 +87,9 @@ public class StratumsphereStatusProvider extends AppWidgetProvider {
 						currentImage = R.drawable.stratum0_open;
 						//dismiss previous useractionrequest
 						notificationManager.cancel(nID);
-
 					}
-					else { //check if connected to Stratum0 while spacestatus is closed	
+					else {
+						//check if connected to Stratum0 while space status is closed	
 						if (wifiInfo.getSSID() != null && wifiInfo.getSSID().equals("Stratum0")) {
 								openSpace();
 								currentImage = R.drawable.stratum0_closed;
@@ -94,7 +97,6 @@ public class StratumsphereStatusProvider extends AppWidgetProvider {
 								text = text + " WIFI";
 								//request action from user
 								notificationManager.notify(nID, nNotOpen);
-								
 						}
 						else {
 							//if not on matching SSID (or not anymore) dismiss the notification
@@ -106,8 +108,6 @@ public class StratumsphereStatusProvider extends AppWidgetProvider {
 					Log.w(TAG, "Exception " + e);
 				}
 			}
-
-
 
 			views.setImageViewResource(R.id.statusImageView, currentImage);
 			views.setTextViewText(R.id.lastUpdateTextView, text);
