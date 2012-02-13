@@ -38,11 +38,13 @@ public class StratumsphereStatusProvider extends AppWidgetProvider {
 		WifiInfo wifiInfo = wifiManager.getConnectionInfo();
 		NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 		Notification nNotOpen = new Notification();
-		nNotOpen.defaults = Notification.DEFAULT_ALL;
+		Intent notificationIntent = new Intent(context, StratumsphereStatusProvider.class);
+		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);		nNotOpen.defaults = Notification.DEFAULT_ALL;
 		nNotOpen.icon = R.drawable.stratum0_unknown;
 		nNotOpen.tickerText = context.getText(R.string.nNotOpen);
 		nNotOpen.when = System.currentTimeMillis();
-		nNotOpen.setLatestEventInfo(context, "Warnung!", "Schnell den Space im IRC als offen makieren.", null);
+		nNotOpen.defaults = Notification.DEFAULT_ALL;
+		nNotOpen.setLatestEventInfo(context, "Warnung!", "Schnell den Space im IRC als offen makieren.", contentIntent);
 		
 		for (int i=0; i<appWidgetIds.length; i++) {
 			int appWidgetId = appWidgetIds[i];
@@ -77,6 +79,7 @@ public class StratumsphereStatusProvider extends AppWidgetProvider {
 					if (jsonObject.getBoolean("isOpen")) {
 						currentImage = R.drawable.stratum0_open;
 						notificationManager.cancel(nID);
+
 					}
 					else {	
 						if (wifiInfo.getSSID() != null && wifiInfo.getSSID().equals("Stratum0")) {

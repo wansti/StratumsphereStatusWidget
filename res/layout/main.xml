@@ -12,6 +12,7 @@
 		    android:layout_weight="1" >
 
 			<ImageView
+			    android:contentDescription="@string/ImageViewDescription"
 			    android:id="@+id/statusImageView"
 			    android:layout_width="match_parent"
 			    android:layout_height="wrap_content"
@@ -38,7 +39,7 @@
 	        android:layout_height="wrap_content"
 	        android:layout_weight="0.20"
 	        android:gravity="center"
-	        android:text="00:00"
+	        android:text="@string/defaultTime"
 	        android:textAppearance="?android:attr/textAppearanceSmall"
 	        android:textSize="10.0dp" />
 
