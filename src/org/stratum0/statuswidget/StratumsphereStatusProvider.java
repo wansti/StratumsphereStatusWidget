@@ -33,13 +33,17 @@ public class StratumsphereStatusProvider extends AppWidgetProvider {
 
 	@Override
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-
+		//get WiFi APIs
 		WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
 		WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+		
+		//Prepare notification
 		NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 		Notification nNotOpen = new Notification();
+		//legacy work for Android 2.x (where notifications need an intenthandler)
 		Intent notificationIntent = new Intent(context, StratumsphereStatusProvider.class);
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);		nNotOpen.defaults = Notification.DEFAULT_ALL;
+		//setting up the notification
 		nNotOpen.icon = R.drawable.stratum0_unknown;
 		nNotOpen.tickerText = context.getText(R.string.nNotOpen);
 		nNotOpen.when = System.currentTimeMillis();
@@ -78,19 +82,22 @@ public class StratumsphereStatusProvider extends AppWidgetProvider {
 
 					if (jsonObject.getBoolean("isOpen")) {
 						currentImage = R.drawable.stratum0_open;
+						//dismiss previous useractionrequest
 						notificationManager.cancel(nID);
 
 					}
-					else {	
+					else { //check if connected to Stratum0 while spacestatus is closed	
 						if (wifiInfo.getSSID() != null && wifiInfo.getSSID().equals("Stratum0")) {
 								openSpace();
 								currentImage = R.drawable.stratum0_closed;
 								upTimeText = "";
 								text = text + " WIFI";
+								//request action from user
 								notificationManager.notify(nID, nNotOpen);
 								
 						}
 						else {
+							//if not on matching SSID (or not anymore) dismiss the notification
 							currentImage = R.drawable.stratum0_closed;
 							notificationManager.cancel(nID);
 						}
@@ -119,7 +126,6 @@ public class StratumsphereStatusProvider extends AppWidgetProvider {
 	
 	
 	private void openSpace() {
-		
 		// call some API to open the Space (change status to open)
 	}
 
