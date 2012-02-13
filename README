@@ -2,11 +2,16 @@ StratumsphereStatusWidget
 
 This is an Android app to show the status of the Stratum 0 hacker space.
 
+TODO open space when connected to WiFi (API is missing)
+
 
 Changelog:
 
-1.0.2	Show "status uptime" inside the logo
+1.1beta1 	Show notification when connected to Stratum0 WiFi 
+		and API retuns status=closed
 
-1.0.1   Switched to JSON API
+1.0.2		Show "status uptime" inside the logo
 
-1.0     Initial release
+1.0.1   	Switched to JSON API
+
+1.0     	Initial release
