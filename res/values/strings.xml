@@ -2,5 +2,6 @@
 <resources>
 
     <string name="app_name">StratumsphereStatusWidget</string>
+    <string name="nNotOpen">Du bist im Space, aber er ist nicht als offen Gemeldet.</string>
 
 </resources>

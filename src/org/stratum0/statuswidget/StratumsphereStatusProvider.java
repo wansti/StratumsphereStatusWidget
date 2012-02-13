@@ -20,28 +20,36 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.widget.RemoteViews;
 import android.util.Log;
-
-
+import android.app.NotificationManager;
+import android.app.Notification;
 
 
 public class StratumsphereStatusProvider extends AppWidgetProvider {
 	
-
+	
 	private static final String TAG = "Stratum0";
-	private String url = "http://rohieb.name/stratum0/status.json";
+	private static final String url = "http://rohieb.name/stratum0/status.json";
+	private static final int nID = 1;
 
 	@Override
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
 
 		WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
 		WifiInfo wifiInfo = wifiManager.getConnectionInfo();
-
+		NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+		Notification nNotOpen = new Notification();
+		nNotOpen.defaults = Notification.DEFAULT_ALL;
+		nNotOpen.icon = R.drawable.stratum0_unknown;
+		nNotOpen.tickerText = context.getText(R.string.nNotOpen);
+		nNotOpen.when = System.currentTimeMillis();
+		nNotOpen.setLatestEventInfo(context, "Warnung!", "Schnell den Space im IRC als offen makieren.", null);
+		
 		for (int i=0; i<appWidgetIds.length; i++) {
 			int appWidgetId = appWidgetIds[i];
 			RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.main);
 			int currentImage = R.drawable.stratum0_unknown;
-			
 			Date now = new GregorianCalendar().getTime();
+
 			//TODO proper number formatting
 			String text = "Updated:\n";
 			String upTimeText = "";
@@ -68,21 +76,20 @@ public class StratumsphereStatusProvider extends AppWidgetProvider {
 
 					if (jsonObject.getBoolean("isOpen")) {
 						currentImage = R.drawable.stratum0_open;
+						notificationManager.cancel(nID);
 					}
-					else {
-						if (wifiInfo.getSSID() == null) {
-							currentImage = R.drawable.stratum0_closed;
-						}
-						else {
-							if (wifiInfo.getSSID().equals("Stratum0") || wifiInfo.getSSID() == null) {
+					else {	
+						if (wifiInfo.getSSID() != null && wifiInfo.getSSID().equals("Stratum0")) {
 								openSpace();
-								currentImage = R.drawable.stratum0_open;
+								currentImage = R.drawable.stratum0_closed;
 								upTimeText = "";
 								text = text + " WIFI";
-							}
-							else{
-								currentImage = R.drawable.stratum0_closed;
-							}
+								notificationManager.notify(nID, nNotOpen);
+								
+						}
+						else {
+							currentImage = R.drawable.stratum0_closed;
+							notificationManager.cancel(nID);
 						}
 					}
 				} catch (Exception e) {
@@ -107,7 +114,9 @@ public class StratumsphereStatusProvider extends AppWidgetProvider {
 		}
 	}
 	
+	
 	private void openSpace() {
+		
 		// call some API to open the Space (change status to open)
 	}
 

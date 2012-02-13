@@ -13,6 +13,7 @@
         <receiver android:name="StratumsphereStatusProvider">
         	<intent-filter>
 				<action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+				<action android:name="android.net.wifi.STATE_CHANGED" />
 			</intent-filter>
 			<meta-data android:name="android.appwidget.provider"
                android:resource="@xml/stratumsphere_info" />
