@@ -68,13 +68,8 @@ public class StratumsphereStatusProvider extends AppWidgetProvider {
 		String jsonText = getStatusFromJSON();
 		Date now = new GregorianCalendar().getTime();
 
-		//TODO proper number formatting
-		String text = "Updated:\n";
 		String upTimeText = "";
-		if (now.getHours() < 10) text += "0";
-		text += now.getHours() + ":";
-		if (now.getMinutes() < 10) text += "0";
-		text += now.getMinutes();
+		String text = String.format("Updated:\n%02d:%02d", now.getHours(), now.getMinutes());
 
 		if (jsonText.startsWith("{") && jsonText.endsWith("}")) {
 			try {
@@ -82,14 +77,11 @@ public class StratumsphereStatusProvider extends AppWidgetProvider {
 				String upTime = jsonObject.getString("since");
 				SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 				Date d = f.parse(upTime);
+				long difference = now.getTime() - d.getTime();
 				//TODO Date class probably offers a better way to do this
-				long upTimeMins = (now.getTime()-d.getTime())/(1000*60) % 60;
-				long upTimeHours = (now.getTime()-d.getTime())/(1000*60) / 60;
-				//TODO proper number formatting
-				if (upTimeHours < 10) upTimeText += "0";
-				upTimeText += upTimeHours + "     ";
-				if (upTimeMins < 10) upTimeText += "0";
-				upTimeText += upTimeMins;
+				long upTimeMins = (difference)/(1000*60) % 60;
+				long upTimeHours = (difference)/(1000*60) / 60;
+				upTimeText = String.format("%02d     %02d", upTimeHours, upTimeMins);
 
 				if (jsonObject.getBoolean("isOpen")) {
 					currentImage = R.drawable.stratum0_open;
@@ -102,7 +94,7 @@ public class StratumsphereStatusProvider extends AppWidgetProvider {
 							openSpace();
 							currentImage = R.drawable.stratum0_closed;
 							upTimeText = "";
-							text = text + " WIFI";
+							text += " WIFI";
 							//request action from user
 							notificationManager.notify(nID, nNotOpen);
 					}
