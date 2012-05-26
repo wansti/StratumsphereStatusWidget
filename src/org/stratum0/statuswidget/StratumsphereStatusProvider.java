@@ -57,6 +57,12 @@ public class StratumsphereStatusProvider extends AppWidgetProvider {
 			int appWidgetId = appWidgetIds[i];
 			RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.main);
 			int currentImage = R.drawable.stratum0_unknown;
+
+			// indicate that the status is currently updating
+			String updatingText = "updating ...\n";
+			views.setTextViewText(R.id.lastUpdateTextView, updatingText);
+			appWidgetManager.updateAppWidget(appWidgetId, views);
+
 			Date now = new GregorianCalendar().getTime();
 
 			//TODO proper number formatting
