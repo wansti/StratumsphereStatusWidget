@@ -53,67 +53,71 @@ public class StratumsphereStatusProvider extends AppWidgetProvider {
 		nNotOpen.defaults = Notification.DEFAULT_ALL;
 		nNotOpen.setLatestEventInfo(context, "Warnung!", "Schnell den Space im IRC als offen makieren.", contentIntent);
 		
+		RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.main);
+		int currentImage = R.drawable.stratum0_unknown;
+
+		// indicate that the status is currently updating
 		for (int i=0; i<appWidgetIds.length; i++) {
 			int appWidgetId = appWidgetIds[i];
-			RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.main);
-			int currentImage = R.drawable.stratum0_unknown;
 
-			// indicate that the status is currently updating
 			String updatingText = "updating ...\n";
 			views.setTextViewText(R.id.lastUpdateTextView, updatingText);
 			appWidgetManager.updateAppWidget(appWidgetId, views);
+		}
 
-			Date now = new GregorianCalendar().getTime();
+		String jsonText = getStatusFromJSON();
+		Date now = new GregorianCalendar().getTime();
 
-			//TODO proper number formatting
-			String text = "Updated:\n";
-			String upTimeText = "";
-			if (now.getHours() < 10) text += "0";
-			text += now.getHours() + ":";
-			if (now.getMinutes() < 10) text += "0";
-			text += now.getMinutes();
-			
-			String jsonText = getStatusFromJSON();
-			if (jsonText.startsWith("{") && jsonText.endsWith("}")) {
-				try {
-					JSONObject jsonObject = new JSONObject(jsonText);
-					String upTime = jsonObject.getString("since");
-					SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-					Date d = f.parse(upTime);
-					//TODO Date class probably offers a better way to do this 
-					long upTimeMins = (now.getTime()-d.getTime())/(1000*60) % 60;
-					long upTimeHours = (now.getTime()-d.getTime())/(1000*60) / 60;
-					//TODO proper number formatting
-					if (upTimeHours < 10) upTimeText += "0"; 
-					upTimeText += upTimeHours + "     ";
-					if (upTimeMins < 10) upTimeText += "0";
-					upTimeText += upTimeMins;
+		//TODO proper number formatting
+		String text = "Updated:\n";
+		String upTimeText = "";
+		if (now.getHours() < 10) text += "0";
+		text += now.getHours() + ":";
+		if (now.getMinutes() < 10) text += "0";
+		text += now.getMinutes();
 
-					if (jsonObject.getBoolean("isOpen")) {
-						currentImage = R.drawable.stratum0_open;
-						//dismiss previous useractionrequest
-						notificationManager.cancel(nID);
+		if (jsonText.startsWith("{") && jsonText.endsWith("}")) {
+			try {
+				JSONObject jsonObject = new JSONObject(jsonText);
+				String upTime = jsonObject.getString("since");
+				SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+				Date d = f.parse(upTime);
+				//TODO Date class probably offers a better way to do this
+				long upTimeMins = (now.getTime()-d.getTime())/(1000*60) % 60;
+				long upTimeHours = (now.getTime()-d.getTime())/(1000*60) / 60;
+				//TODO proper number formatting
+				if (upTimeHours < 10) upTimeText += "0";
+				upTimeText += upTimeHours + "     ";
+				if (upTimeMins < 10) upTimeText += "0";
+				upTimeText += upTimeMins;
+
+				if (jsonObject.getBoolean("isOpen")) {
+					currentImage = R.drawable.stratum0_open;
+					//dismiss previous useractionrequest
+					notificationManager.cancel(nID);
+				}
+				else {
+					//check if connected to Stratum0 while space status is closed
+					if (wifiInfo.getSSID() != null && wifiInfo.getSSID().equals("Stratum0")) {
+							openSpace();
+							currentImage = R.drawable.stratum0_closed;
+							upTimeText = "";
+							text = text + " WIFI";
+							//request action from user
+							notificationManager.notify(nID, nNotOpen);
 					}
 					else {
-						//check if connected to Stratum0 while space status is closed	
-						if (wifiInfo.getSSID() != null && wifiInfo.getSSID().equals("Stratum0")) {
-								openSpace();
-								currentImage = R.drawable.stratum0_closed;
-								upTimeText = "";
-								text = text + " WIFI";
-								//request action from user
-								notificationManager.notify(nID, nNotOpen);
-						}
-						else {
-							//if not on matching SSID (or not anymore) dismiss the notification
-							currentImage = R.drawable.stratum0_closed;
-							notificationManager.cancel(nID);
-						}
+						//if not on matching SSID (or not anymore) dismiss the notification
+						currentImage = R.drawable.stratum0_closed;
+						notificationManager.cancel(nID);
 					}
-				} catch (Exception e) {
-					Log.w(TAG, "Exception " + e);
 				}
+			} catch (Exception e) {
+				Log.w(TAG, "Exception " + e);
 			}
+		}
+		for (int i=0; i<appWidgetIds.length; i++) {
+			int appWidgetId = appWidgetIds[i];
 
 			views.setImageViewResource(R.id.statusImageView, currentImage);
 			views.setTextViewText(R.id.lastUpdateTextView, text);
