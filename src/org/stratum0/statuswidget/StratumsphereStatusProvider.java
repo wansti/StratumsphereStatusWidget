@@ -27,7 +27,7 @@ import android.app.Notification;
 public class StratumsphereStatusProvider extends AppWidgetProvider {
 	
 	private static final String TAG = "Stratum0";
-	private static final String url = "http://rohieb.name/stratum0/status.json";
+	private static final String url = "http://status.stratum0.org/status.json";
 	private static final int nID = 1;
 
 	@Override
