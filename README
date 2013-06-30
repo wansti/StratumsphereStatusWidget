@@ -6,17 +6,19 @@ TODO open space when connected to WiFi (API is missing)
 
 
 Changelog:
+1.0.7       Semi-transparent background for "last updated" widget text
+
 1.0.6       New server URL
 
-1.0.5	 	Update all widget instances simultaneously
+1.0.5       Update all widget instances simultaneously
 
-1.0.4	 	Indicate running update
+1.0.4       Indicate running update
 
-1.0.3	 	Show notification when connected to Stratum0 WiFi 
-			and API retuns status=closed
+1.0.3       Show notification when connected to Stratum0 WiFi
+            and API retuns status=closed
 
-1.0.2		Show "status uptime" inside the logo
+1.0.2       Show "status uptime" inside the logo
 
-1.0.1   	Switched to JSON API
+1.0.1       Switched to JSON API
 
-1.0     	Initial release
+1.0         Initial release
